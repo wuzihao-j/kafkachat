@@ -3,8 +3,8 @@ package com.wzh.paper.demo;
 public class ProducerClient {
 
     public static void main(String[] args) {
-        TestProducer pro = new TestProducer(ConfigureAPI.TOPIC);
-        pro.start();
+        Sender pro = new Sender(111, 123);
+        new Thread(pro).start();
     }
 
 

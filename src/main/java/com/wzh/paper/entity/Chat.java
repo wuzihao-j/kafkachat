@@ -3,24 +3,24 @@ package com.wzh.paper.entity;
 import java.util.Date;
 
 public class Chat {
-    private String sender;
-    private String receiver;
+    private long sender;
+    private long receiver;
     private String msg;
     private Date time;
 
-    public String getSender() {
+    public long getSender() {
         return sender;
     }
 
-    public void setSender(String sender) {
+    public void setSender(long sender) {
         this.sender = sender;
     }
 
-    public String getReceiver() {
+    public long getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(String receiver) {
+    public void setReceiver(long receiver) {
         this.receiver = receiver;
     }
 

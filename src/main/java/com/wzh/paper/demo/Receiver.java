@@ -5,6 +5,7 @@ import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.message.MessageAndMetadata;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,38 +19,41 @@ import java.util.Properties;
  *
  * @Note Kafka Consumer
  */
-public class TestConsumer extends Thread {
+public class Receiver implements Runnable {
 
     private ConsumerConnector consumer;
     private String topic;
     private final int SLEEP = 1000 * 3;
 
-    public TestConsumer(String topic) {
-        consumer = Consumer.createJavaConsumerConnector(this.consumerConfig());
-        this.topic = topic;
+    public Receiver(long receiverID) {
+        consumer = Consumer.createJavaConsumerConnector(this.consumerConfig(receiverID));
+        this.topic = receiverID + "";
     }
 
-    private ConsumerConfig consumerConfig() {
+    private ConsumerConfig consumerConfig(long receiverID) {
         Properties props = new Properties();
         props.put("zookeeper.connect", ConfigureAPI.ZK);
-        props.put("group.id", ConfigureAPI.GROUP_ID);
+        props.put("group.id", receiverID + "");
         props.put("zookeeper.session.timeout.ms", "40000");
         props.put("zookeeper.sync.time.ms", "200");
         props.put("auto.commit.interval.ms", "1000");
         return new ConsumerConfig(props);
     }
 
-    @Override
     public void run() {
         Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
         topicCountMap.put(topic, new Integer(1));
         Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
         KafkaStream<byte[], byte[]> stream = consumerMap.get(topic).get(0);
         ConsumerIterator<byte[], byte[]> it = stream.iterator();
-        while (it.hasNext()) {
-            System.out.println("Receive->[" + new String(it.next().message()) + "]");
+        if (it.hasNext()) {
+            String line = new String(it.next().message());
+            int sep = line.indexOf(":");
+            String senderID = line.substring(0, sep);
+            String content = line.substring(sep + 1, line.length());
+            System.out.println(senderID + "say:" + content);
             try {
-                sleep(SLEEP);
+                Thread.sleep(SLEEP);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
